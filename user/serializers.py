@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from user.models import User
 
-
+# Register user Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
 
@@ -22,3 +22,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+# User Profile Serializer
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "email", "date_joined", "avatar", "department")

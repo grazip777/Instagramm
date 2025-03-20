@@ -3,10 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Create your models here.
-
-
-# Create your models here.
+# User Manager
 class UserManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         if not email:
@@ -34,12 +31,12 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-
+# Model User
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=8)
+    password = models.CharField(min_length=8, max_length=100)
     avatar = models.ImageField(upload_to='user/')
-    username = models.CharField(max_length=100)
+    username = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     objects = UserManager()
     USERNAME_FIELD = 'email'
