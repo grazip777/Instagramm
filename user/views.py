@@ -18,14 +18,10 @@ def register(request):
         }, status=200)
     return Response(serializer.errors, status=400)
 
-@api_view(['GET'])
+@api_view(['GET']) # http://127.0.0.1:8000/user/register/
 def get_users(request):
     data_from_db = User.objects.all()
-    department_filter_id = request.query_params.get("dep")
-    if department_filter_id:
-        data_from_db = data_from_db.filter(department__id=department_filter_id)
     if len(data_from_db) == 0:
-        return Response({"message": "Сотрудников нету"}, status=200)
-
+        return Response({"message": "Пользователей нетуу"}, status=200)
     serializer = UserProfileSerializer(data_from_db, many=True)
     return Response(serializer.data, status=200)
