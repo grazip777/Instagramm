@@ -1,7 +1,7 @@
 # imports
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from user.models import User, Subscription
@@ -200,3 +200,44 @@ class ListFollowingView(APIView):
         serializer = SubscriptionSerializer(following, many=True)  # Serialize the results
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class SearchUserAPIView(APIView):
+    """
+    Endpoint for searching users by their username.
+
+    This view allows any user (authenticated or not) to search for existing users 
+    based on a partial or complete match of the username. The `username` query 
+    parameter must be provided, and the search is case-insensitive.
+
+    Access: Open to all (no authentication required).
+    Permissions: AllowAny
+    HTTP Methods: GET
+    """
+
+    permission_classes = [AllowAny]  # Open access for search
+
+    def get(self, request):
+        """
+        Handles the search functionality for users by username.
+
+        This method retrieves the 'username' query parameter from the request, 
+        performs a case-insensitive search for users whose username contains 
+        the query string, and returns the matching results.
+
+        Args:
+            request: The HTTP request object containing optional query parameters.
+
+        Query Params:
+            username (str): The username or part of the username to search for.
+
+        Returns:
+            - 200: A list of matching users if the `username` query parameter is provided.
+            - 400: An error response if the `username` query parameter is missing.
+        """
+        query = request.query_params.get('username', '')  # We get 'username' from request parameters
+        if query:
+            users = User.objects.filter(username__icontains=query)  # Username filtering
+            serializer = UserProfileSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({"error": "Введите параметр username для запроса"}, status=status.HTTP_400_BAD_REQUEST)
