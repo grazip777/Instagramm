@@ -108,8 +108,6 @@ class User(AbstractUser):
         """Check if another user has been signed for the current"""
         return Subscription.objects.filter(follower=user, following=self).exists()
 
-
-
 class Subscription(models.Model):
     """
     Represents a subscription or "follow" relationship between two users.
