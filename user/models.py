@@ -84,7 +84,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)  # User's email address, serves as the unique identifier
     avatar = models.ImageField(upload_to='users_avatars/')  # Profile picture of the user
-    username = models.CharField(max_length=50)  # User's display name
+    username = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)  # Indicates if the user's account is active
 
     objects = UserManager()

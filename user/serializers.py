@@ -7,7 +7,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("email", "password", "password2", "avatar")
+        fields = ("email", "password", "password2", "avatar", "username")
 
     def validate(self, attrs):
         password = attrs.get("password")
@@ -42,7 +42,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "date_joined", "avatar")
+        fields = ("id", "email", "username", "date_joined", "avatar")
 
 from rest_framework import serializers
 from .models import Subscription
