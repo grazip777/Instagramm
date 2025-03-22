@@ -1,22 +1,22 @@
-import requests
+from telebot import TeleBot
 
-TELEGRAM_BOT_TOKEN = '7849588920:AAHZz2-8ED-fYdMQLCO9z0D2nJlTF_cxUaU'
-TELEGRAM_CHAT_ID = '@your_channel_or_chat_id'
+TOKEN = "7849588920:AAHZz2-8ED-fYdMQLCO9z0D2nJlTF_cxUaU"
+GROUP_ID = -1002432586762
+bot = TeleBot(TOKEN)
 
 
 def send_to_telegram(data):
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage'
-    message_text = f"<b>Новая заявка</b>\n\n<pre>{data}</pre>"
+    try:
+        message = (
+            f"📝 *Новая жалоба:*\n"
+            f"🔹 *ID:* {data.get('id')}\n"
+            f"👤 *От пользователя:* {data.get('user')}\n"
+            f"🔸 *На пользователя:* {data.get('to')}\n"
+            f"❓ *Категория:* {data.get('reason')}\n"
+            f"💬 *Описание:* {data.get('description')}\n"
+            f"📅 *Создано:* {data.get('created_at')}\n"
+        )
 
-    payload = {
-        'chat_id': TELEGRAM_CHAT_ID,
-        'text': message_text,
-        'parse_mode': 'HTML'
-    }
-
-    response = requests.post(url, data=payload)
-
-    if response.status_code != 200:
-        print(f"Ошибка отправки в Telegram: {response.text}")
-
-    return response.status_code
+        bot.send_message(chat_id=GROUP_ID, text=message, parse_mode="Markdown")
+    except Exception as e:
+        print(f"Ошибка отправки сообщения в Telegram: {e}")
