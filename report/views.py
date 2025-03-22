@@ -5,7 +5,7 @@ from report.serializers import ReportSerializer
 from report.utils import send_to_telegram
 
 
-class CreateReportView(CreateAPIView):  # Создание жалобы
+class CreateReportView(CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     permission_classes = [IsAuthenticated]
@@ -15,10 +15,10 @@ class CreateReportView(CreateAPIView):  # Создание жалобы
 
         body = {
             "id": report.id,
-            "user": report.user.username if report.user else "Anonymous",
-            "to": report.to.username if report.to else "N/A",
-            "reason": report.reason,
-            "description": report.description,
+            "user": report.user.username,
+            "to": report.to.username,
+            "reason": report.category.name,
+            "description": report.text,
             "created_at": str(report.created_at)
         }
 
