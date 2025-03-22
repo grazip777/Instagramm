@@ -74,7 +74,6 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-# Model User
 class User(AbstractUser):
     """
     Represents a user in the system, inheriting from Django's AbstractUser.
@@ -107,6 +106,7 @@ class User(AbstractUser):
     def is_followed_by(self, user):
         """Check if another user has been signed for the current"""
         return Subscription.objects.filter(follower=user, following=self).exists()
+
 
 class Subscription(models.Model):
     """

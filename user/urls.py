@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView
-from user.views import register, get_users, update_user_by_id, delete_user_by_id
+from user.views import register, get_users, update_user_by_id, delete_user_by_id, SearchUserAPIView
 from user.views import FollowUserView, UnfollowUserView, ListFollowersView, ListFollowingView
 
 # User-related URLs
@@ -19,6 +19,11 @@ urlpatterns = [
 
     # DELETE: Remove a user by ID (admin only). URL: http://127.0.0.1:8000/user/delete/<id>/
     path('delete/<int:id>/', delete_user_by_id, name="delete-user"),
+
+    # GET: Search for users by given query parameters. URL: http://127.0.0.1:8000/user/users/search/
+    # Allows filtering based on various query parameters like username, etc.
+    path('users/search/', SearchUserAPIView.as_view(), name='user-search'),
+
 ]
 
 # Subscription-related URLs

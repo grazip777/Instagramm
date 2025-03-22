@@ -1,8 +1,11 @@
 from rest_framework import permissions
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
-
-from .models import Post
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .utils import extract_hashtags
+from .models import Post, Hashtag
 from .permissions import IsOwnerOrReadOnly
 from .serializers import PostSerializer
 
@@ -80,4 +83,51 @@ class PostDeleteAPIView(DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]  # Authentication check
+
+
+class PostListCreateAPIView(APIView):
+    """
+    Class for creating and displaying the list of posts.
+    """
+
+    def get(self, request, *args, **kwargs):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        content = data.get('content', '')  # We extract the content of the post
+
+        # Automatically remove hashtags from the text
+        hashtags = extract_hashtags(content)
+        serializer = PostSerializer(data=data)
+
+        if serializer.is_valid():
+            post = serializer.save(author=request.user)  # We retain the post with the current author
+
+            # Add the hashtags to the post
+            for tag_name in hashtags:
+                hashtag, created = Hashtag.objects.get_or_create(name=tag_name.lower())
+                post.hashtags.add(hashtag)
+
+            return Response(PostSerializer(post).data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SearchByHashtagAPIView(APIView):
+    """
+    ЭInpoint for finding posts on a hashtag.
+    """
+
+    def get(self, request, hashtag_name, *args, **kwargs):
+        try:
+            hashtag = Hashtag.objects.get(name=hashtag_name.lower())  # We are looking for a hashtag by name
+        except Hashtag.DoesNotExist:
+            return Response({"detail": "Хештег не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        posts = Post.objects.filter(hashtags=hashtag)  # Find the posts associated with this hashtag
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 

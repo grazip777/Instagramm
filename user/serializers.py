@@ -1,6 +1,8 @@
 from rest_framework import serializers
-
+from rest_framework import serializers
+from .models import Subscription
 from user.models import User
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)  # Field only for recording
@@ -38,14 +40,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-# User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "email", "username", "date_joined", "avatar")
-
-from rest_framework import serializers
-from .models import Subscription
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
