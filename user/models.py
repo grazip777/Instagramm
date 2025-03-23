@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.timezone import now
-
+from django.db.models import UniqueConstraint
 
 # User Manager
 class UserManager(BaseUserManager):
@@ -39,6 +39,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='users_avatars/')
     username = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
+    followers_count = models.IntegerField(default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -46,10 +47,17 @@ class User(AbstractUser):
 
     def follow(self, user):
         if self != user:
-            Subscription.objects.get_or_create(follower=self, following=user)
+            subscription, created = Subscription.objects.get_or_create(follower=self, following=user)
+            if created:
+                user.followers_count += 1
+                user.save()
 
     def unfollow(self, user):
-        Subscription.objects.filter(follower=self, following=user).delete()
+        deleted, _ = Subscription.objects.filter(follower=self, following=user).delete()
+        if deleted > 0:
+            # Пересчитываем реальные подписчики
+            user.followers_count = Subscription.objects.filter(following=user).count()
+            user.save()
 
     def is_following(self, user):
         return Subscription.objects.filter(follower=self, following=user).exists()
@@ -64,8 +72,8 @@ class Subscription(models.Model):
     subscribed_at = models.DateTimeField(default=now)
 
     class Meta:
-        unique_together = ('follower', 'following')
+        constraints = [
+            UniqueConstraint(fields=['follower', 'following'], name='unique_subscription')
+        ]
         ordering = ['-subscribed_at']
 
-    def __str__(self):
-        return f"{self.follower} -> {self.following}"

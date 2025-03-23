@@ -1,7 +1,11 @@
 from django.urls import path
-from report.views import CreateReportView, CreateReportCategoryView
+from .views import CreateReportView, ReportCategoryView
 
 urlpatterns = [
-    path('report/', CreateReportView.as_view(), name='report'),
-    path('report/category/', CreateReportCategoryView.as_view(), name='report-category'),
+    # Маршрут для создания жалоб
+    path('report/', CreateReportView.as_view(), name='create-report'),
+
+    # Маршруты для работы с категориями жалоб
+    path('report/category/', ReportCategoryView.as_view(), name='category-list'),
+    path('report/category/<int:pk>/', ReportCategoryView.as_view(), name='category-detail'),
 ]

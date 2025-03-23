@@ -19,16 +19,22 @@ def register(request):
         }, status=200)
     return Response(serializer.errors, status=400)
 
+
 # Get user
 @api_view(['GET'])
 def get_users(request):
     if not request.user.is_staff:
-        return Response({"error": "Доступ запрещен. Только администратор может выполнить данный запрос."}, status=403)
-    data_from_db = User.objects.all()
-    if len(data_from_db) == 0:
-        return Response({"message": "Пользователей нету"}, status=200)
-    serializer = UserProfileSerializer(data_from_db, many=True)
-    return Response(serializer.data, status=200)
+        data_from_db = User.objects.filter(is_staff=False)
+        if len(data_from_db) == 0:
+            return Response({"message": "Пользователей нету"}, status=200)
+        serializer = UserProfileSerializer(data_from_db, many=True)
+        return Response(serializer.data, status=200)
+    elif request.user.is_staff:
+        data_from_db = User.objects.all()
+        if len(data_from_db) == 0:
+            return Response({"message": "Пользователей нету"}, status=200)
+        serializer = UserProfileSerializer(data_from_db, many=True)
+        return Response(serializer.data, status=200)
 
 
 @api_view(["PUT"])
@@ -63,25 +69,15 @@ def delete_user_by_id(request, id):
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        following_id = kwargs.get("user_id")
+    def post(self, request, format=None):
+        to_follow_id = request.data.get('user_id')
         try:
-            following = User.objects.get(id=following_id)
+            to_follow = User.objects.get(id=to_follow_id)
+            request.user.follow(to_follow)  # Здесь вызывается метод follow()
+            return Response({'success': 'Вы подписались на пользователя.'}, status=200)
         except User.DoesNotExist:
-            return Response({"error": "Пользователь не найден."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Пользователь не найден.'}, status=404)
 
-        if following == request.user:
-            return Response({"error": "Вы не можете подписаться сами на себя."}, status=status.HTTP_400_BAD_REQUEST)
-
-        subscription, created = Subscription.objects.get_or_create(
-            follower=request.user,
-            following=following
-        )
-        if not created:
-            return Response({"error": "Вы уже подписаны на этого пользователя."}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = SubscriptionSerializer(subscription)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UnfollowUserView(APIView):
@@ -138,3 +134,10 @@ class SearchUserAPIView(APIView):
         return Response({"error": "Введите параметр username для запроса"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+def get_emails(request):
+    users = User.objects.all()
+    emails = []
+    for user in users:
+        emails.append(user.email)
+    return Response({"emails": emails}, status=200)

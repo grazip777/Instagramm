@@ -1,12 +1,10 @@
 from rest_framework import permissions, serializers
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from transformers import pipeline
 from .models import Post
 from .permissions import IsOwnerOrReadOnly
 from .serializers import PostSerializer
 
-classifier = pipeline("text-classification", model="unitary/toxic-bert")
 
 
 class PostListAPIView(ListAPIView):
@@ -29,13 +27,8 @@ class PostCreateAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         content = serializer.validated_data['content']
-        if self.is_toxic(content):
-            raise serializers.ValidationError("Пост содержит токсичные выражения и не может быть создан.")
         serializer.save(author=self.request.user)
 
-    def is_toxic(self, text):
-        result = classifier(text)
-        return result[0]['label'] == 'LABEL_1'
 
 
 class PostUpdateAPIView(UpdateAPIView):
