@@ -1,7 +1,7 @@
 from django.urls import path
-from report.views import CreateReportView, CreateReportCategoryView
+from report.views import CreateReportView, ReportCategoryView
 
 urlpatterns = [
-    path('report/', CreateReportView.as_view(), name='report'),
-    path('report/category/', CreateReportCategoryView.as_view(), name='report-category'),
+    path('send/', CreateReportView.as_view(), name='report'),
+    path('category/', ReportCategoryView.as_view(), name='report-category'),
 ]

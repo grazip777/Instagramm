@@ -25,7 +25,21 @@ class CreateReportView(CreateAPIView):
         send_to_telegram(body)
 
 
-class CreateReportCategoryView(CreateAPIView):
-    queryset = ReportCategory.objects.all()
-    serializer_class = ReportCategory
-    permission_classes = [IsAdminUser]
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import ReportCategory
+from .serializers import ReportCategorySerializer
+
+
+class ReportCategoryView(APIView):
+    def get(self, request, *args, **kwargs):
+        categories = ReportCategory.objects.all()
+        serializer = ReportCategorySerializer(categories, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ReportCategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

@@ -28,7 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "username", "date_joined", "avatar")
+        fields = ("id", "email", "username", "date_joined", "avatar", "followers_count")
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
