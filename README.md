@@ -166,4 +166,12 @@ Starting development server at http://127.0.0.1:8000/
 **URL:** `/media/<путь_к_файлу>`
 **Описание:** Предоставляет доступ к медиафайлам проекта (например, к загруженным аватарам).
 
-Это подробное описание всех ссылок из кода, который вы предоставили.
+### Команды
+1. ** Запуск проекта
+  `python manage.py runserver`
+2. ** Запуск бота
+   `python manage.py start_bot`
+3. ** Создать миграции
+    `python manage.py makemigrations`
+4. ** Активировать миграции
+   `python manage.py migrate`

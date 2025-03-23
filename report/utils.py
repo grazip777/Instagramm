@@ -5,7 +5,8 @@ CHAT_ID = "2143828594"
 API = "https://api.telegram.org/bot"
 method = API + API_TOKEN + "/sendMessage"
 
-def snd_msg():
+def send_message(text):
     req = requests.post(method, data={
-        "text": "wowwwwww"
+        "chat_id": CHAT_ID,
+        "text": text
     })
