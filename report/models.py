@@ -7,6 +7,9 @@ class ReportCategory(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=100, blank=True, null=True)
 
+    class Meta:
+        managed = False  # Django не будет управлять таблицей в базе данных
+
 
 class Report(models.Model):
     category = models.ForeignKey(ReportCategory, on_delete=models.CASCADE)
