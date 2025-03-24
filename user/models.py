@@ -33,10 +33,10 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-
+# User
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(upload_to='users_avatars/')
+    avatar = models.ImageField(upload_to='users_avatars/', default='users_avatars/default_avatar/default_avatar.jpg')
     username = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
     followers_count = models.IntegerField(default=0)
@@ -45,28 +45,28 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    def follow(self, user):
+    def follow(self, user): # follow
         if self != user:
             subscription, created = Subscription.objects.get_or_create(follower=self, following=user)
             if created:
                 user.followers_count += 1
                 user.save()
 
-    def unfollow(self, user):
+    def unfollow(self, user): # unfollow
         deleted, _ = Subscription.objects.filter(follower=self, following=user).delete()
         if deleted > 0:
             # Пересчитываем реальные подписчики
             user.followers_count = Subscription.objects.filter(following=user).count()
             user.save()
 
-    def is_following(self, user):
+    def is_following(self, user): # following
         return Subscription.objects.filter(follower=self, following=user).exists()
 
-    def is_followed_by(self, user):
+    def is_followed_by(self, user): # followed by
         return Subscription.objects.filter(follower=user, following=self).exists()
 
 
-class Subscription(models.Model):
+class Subscription(models.Model): # subscription
     follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
     subscribed_at = models.DateTimeField(default=now)

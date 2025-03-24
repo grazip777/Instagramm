@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Subscription
 from user.models import User
 
-
+# register serializers
 class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
 
@@ -10,7 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ("email", "password", "password2", "avatar", "username")
 
-    def validate(self, attrs):
+    def validate(self, attrs): # validation
         password = attrs.get("password")
         password2 = attrs.pop("password2")
         if len(password) < 8:
@@ -20,18 +20,18 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def create(self, validated_data):
+    def create(self, validated_data): # create
         user = User.objects.create_user(**validated_data)
         return user
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer): # user profile serializer
     class Meta:
         model = User
         fields = ("id", "email", "username", "date_joined", "avatar", "followers_count")
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class SubscriptionSerializer(serializers.ModelSerializer): # subscription serializer
     follower = serializers.StringRelatedField(read_only=True)
     following = serializers.StringRelatedField(read_only=True)
 

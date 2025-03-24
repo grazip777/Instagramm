@@ -1,4 +1,3 @@
-
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +7,7 @@ from user.models import User, Subscription
 from user.serializers import RegisterSerializer, UserProfileSerializer, SubscriptionSerializer
 
 
+# Регистрация пользователей
 @api_view(["POST"])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
@@ -20,7 +20,18 @@ def register(request):
     return Response(serializer.errors, status=400)
 
 
-# Get user
+# Получение пользователей по ID
+@api_view(['GET'])
+def get_user_by_id(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=200)
+    except User.DoesNotExist:
+        return Response({"error": "Пользователь не найден."}, status=404)
+
+
+# Получение всех пользователей
 @api_view(['GET'])
 def get_users(request):
     if not request.user.is_staff:
@@ -36,24 +47,16 @@ def get_users(request):
         serializer = UserProfileSerializer(data_from_db, many=True)
         return Response(serializer.data, status=200)
 
-
+# Изменение данных пользователей по ID
 @api_view(["PUT"])
 def update_user_by_id(request, id):
-    try:
-        user = User.objects.get(id=id)
-    except User.DoesNotExist:
-        return Response({"error": "Пользователь не найден."}, status=404)
+    text = ("Доступ запрещен."
+            "Только администратор может выполнить данный запрос."
+            "Для запроса на изменение данных пишите на почту 'Delt.6600@gmail.com'")
+    if not request.user.is_staff:
+        return Response({"error": text}, status=403)
 
-    if request.user != user and not request.user.is_staff:
-        return Response({"error": "Доступ запрещен. Вы можете обновить только свою учетную запись."}, status=403)
-
-    serializer = UserProfileSerializer(user, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "Информация пользователя обновлена."}, status=200)
-    return Response(serializer.errors, status=400)
-
-
+# Удаление пользователей по ID
 @api_view(['DELETE'])
 def delete_user_by_id(request, id):
     if not request.user.is_staff:
@@ -65,7 +68,7 @@ def delete_user_by_id(request, id):
     user.delete()
     return Response({"message": "Пользователь удален!."}, status=200)
 
-
+# Подписаться на пользователя
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -79,7 +82,7 @@ class FollowUserView(APIView):
             return Response({'error': 'Пользователь не найден.'}, status=404)
 
 
-
+# Отписаться от пользователя
 class UnfollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -104,7 +107,7 @@ class UnfollowUserView(APIView):
 
         return Response({"error": "Нет подписки на удаление."}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# Подписчики
 class ListFollowersView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -112,7 +115,7 @@ class ListFollowersView(APIView):
         serializer = SubscriptionSerializer(followers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# Подписки
 class ListFollowingView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -121,7 +124,7 @@ class ListFollowingView(APIView):
         serializer = SubscriptionSerializer(following, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# Найти пользователя по username
 class SearchUserAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -133,7 +136,7 @@ class SearchUserAPIView(APIView):
 
         return Response({"error": "Введите параметр username для запроса"}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# Получение пользователй
 @api_view(["GET"])
 def get_emails(request):
     users = User.objects.all()
