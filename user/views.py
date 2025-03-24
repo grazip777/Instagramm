@@ -144,3 +144,47 @@ def get_emails(request):
     for user in users:
         emails.append(user.email)
     return Response({"emails": emails}, status=200)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.core.mail import send_mail
+from user.models import User
+from .serializers import SendAuthCodeSerializer, VerifyAuthCodeSerializer
+
+
+class SendCodeAPIView(APIView):
+    """Отправка кода аутентификации на email пользователя."""
+
+    def post(self, request, *args, **kwargs):
+        serializer = SendAuthCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            user = User.objects.get(email=email)
+            user.set_auth_code()  # Генерация кода
+
+            # Отправка письма
+            try:
+                send_mail(
+                    subject="Ваш код для входа",
+                    message=f"Ваш код подтверждения: {user.auth_code}. Срок действия: 5 минут.",
+                    from_email="no-reply@example.com",
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                return Response({"error": "Не удалось отправить письмо."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({"message": "Код отправлен на вашу почту."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyCodeAPIView(APIView):
+    """Проверка кода аутентификации."""
+
+    def post(self, request, *args, **kwargs):
+        serializer = VerifyAuthCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            return Response({"message": "Успешный вход в систему!"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

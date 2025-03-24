@@ -1,3 +1,4 @@
+from django.utils.timezone import timedelta
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -36,14 +37,36 @@ class UserManager(BaseUserManager):
 # User
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(upload_to='users_avatars/', default='users_avatars/default_avatar/default_avatar.jpg')
+    avatar = models.ImageField(upload_to='users_avatars/',
+                               default='users_avatars/default_avatar/default_avatar.jpg')
     username = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
     followers_count = models.IntegerField(default=0)
+    auth_code = models.CharField(max_length=6, blank=True, null=True)  # Код для входа
+    auth_code_expires = models.DateTimeField(blank=True, null=True)  # Время действия кода
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    def set_auth_code(self):
+        """Генерирует код аутентификации и устанавливает срок действия."""
+        import random
+        from django.utils.timezone import now
+        self.auth_code = str(random.randint(100000, 999999))  # Генерация 6-значного кода
+        self.auth_code_expires = now() + timedelta(minutes=5)  # Код действителен 5 минут
+        self.save()
+
+    def verify_auth_code(self, code):
+        """Проверяет код аутентификации."""
+        from django.utils.timezone import now
+        if self.auth_code == code and self.auth_code_expires > now():
+            self.auth_code = None  # Код можно удалить после успешной проверки
+            self.auth_code_expires = None
+            self.save()
+            return True
+        return False
+
 
     def follow(self, user): # follow
         if self != user:

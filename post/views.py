@@ -6,7 +6,7 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers import PostSerializer
 
 
-
+# Получение постов
 class PostListAPIView(ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -19,7 +19,7 @@ class PostListAPIView(ListAPIView):
             return queryset
         return self.get_queryset()
 
-
+# Создание постов
 class PostCreateAPIView(CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -30,13 +30,13 @@ class PostCreateAPIView(CreateAPIView):
         serializer.save(author=self.request.user)
 
 
-
+# Изменение постов
 class PostUpdateAPIView(UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminUser]
 
-
+# Удаление постов
 class PostDeleteAPIView(DestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer

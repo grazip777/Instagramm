@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Like, Dislike, Post
 
-
+# Лайк
 class LikeAPIView(APIView):
     def post(self, request, post_id):
         try:
@@ -21,7 +21,7 @@ class LikeAPIView(APIView):
         Like.objects.create(user=user, post=post)
         return Response({'message': 'Like added'}, status=status.HTTP_201_CREATED)
 
-
+# Дизлайк
 class DislikeAPIView(APIView):
     def post(self, request, post_id):
         try:

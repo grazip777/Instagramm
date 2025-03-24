@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Like, Dislike, Post
 
-
+# Лайк
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
@@ -22,7 +22,7 @@ class LikeSerializer(serializers.ModelSerializer):
         # Создаём новый лайк
         return super().create(validated_data)
 
-
+# Дизлайк
 class DislikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dislike

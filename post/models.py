@@ -2,7 +2,7 @@ from django.db import models
 from rest_framework.authtoken.admin import User
 from django.core.exceptions import ValidationError
 
-
+# Пост
 class Post(models.Model):
 
     photo = models.ImageField(upload_to='post_photo/', blank=True, null=True)

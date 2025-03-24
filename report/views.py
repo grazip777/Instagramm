@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from .models import ReportCategory, Report
 from .serializers import ReportCategorySerializer, ReportSerializer
 
-# report category
+# Категория жалоб
 class ReportCategoryView(APIView):
     def get(self, request, *args, **kwargs): # get category
         categories = ReportCategory.objects.all()
@@ -19,27 +19,28 @@ class ReportCategoryView(APIView):
         if serializer.is_valid():
             category = serializer.save()
 
-            # telegram message
+            # Телеграм сообщение
             message = f"Новая категория жалобы создана:\n\n" \
                       f"Название: {category.name}\n" \
                       f"Описание: {category.description}"
 
-            # send message on telegram
+            # Отправка сообщение на телеграм
             send_message(message)
 
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+# Создание репорта
 class CreateReportView(CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # create report
+        # Создание репорта
         report = serializer.save()
 
-        # telegram message
+        # Телеграм сообщение
         message = (
             f"❗ Новая жалоба:\n\n"
             f"ID жалобы: {report.id}\n"
@@ -50,5 +51,5 @@ class CreateReportView(CreateAPIView):
             f"Создано: {report.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
-        # send message telegram
+        # Отправка сообщение на телеграм
         send_message(message, report.category.name)

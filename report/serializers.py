@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from .models import Report, ReportCategory
 
-
+# Категория
 class ReportCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportCategory
         fields = '__all__'
 
-
+# Жалоба
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report

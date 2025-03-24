@@ -5,3 +5,4 @@ djangorestframework_simplejwt
 requests
 telebot
 psutil
+email-validator

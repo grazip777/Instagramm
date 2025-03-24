@@ -7,7 +7,7 @@ FRAUD_CHAT_ID = "-4769114028" # Мошенничество
 BAG_CHAT_ID = "-4736988210" # Баг
 API_URL = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
 
-
+# Отправка сообщение на телеграмм
 def send_message(text, category):
     try:
         if category == "Спам":

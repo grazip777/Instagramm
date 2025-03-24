@@ -38,3 +38,32 @@ class SubscriptionSerializer(serializers.ModelSerializer): # subscription serial
     class Meta:
         model = Subscription
         fields = ['id', 'follower', 'following', 'subscribed_at']
+
+from rest_framework import serializers
+from user.models import User
+
+
+class SendAuthCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Пользователь с таким email не существует.")
+        return value
+
+
+class VerifyAuthCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        code = attrs.get("code")
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Пользователь с таким email не найден.")
+
+        if not user.verify_auth_code(code):
+            raise serializers.ValidationError("Неверный или истёкший код аутентификации.")
+        return attrs
