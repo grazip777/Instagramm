@@ -4,6 +4,10 @@ from .models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
+    comment_count = serializers.IntegerField(read_only=True)  # Отображаем количество комментариев
+    like_count = serializers.IntegerField(read_only=True)  # Отображаем количество лайков
+    dislike_count = serializers.IntegerField(read_only=True)  # Отображаем количество дизлайков
+
     class Meta:
         model = Post
         fields = '__all__'

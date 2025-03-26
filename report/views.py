@@ -7,39 +7,40 @@ from rest_framework.response import Response
 from .models import ReportCategory, Report
 from .serializers import ReportCategorySerializer, ReportSerializer
 
-
+# Категория жалоб
 class ReportCategoryView(APIView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs): # get category
         categories = ReportCategory.objects.all()
         serializer = ReportCategorySerializer(categories, many=True)
         return Response(serializer.data)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs): # create category
         serializer = ReportCategorySerializer(data=request.data)
         if serializer.is_valid():
             category = serializer.save()
 
-            # Формируем сообщение для Telegram
+            # Телеграм сообщение
             message = f"Новая категория жалобы создана:\n\n" \
                       f"Название: {category.name}\n" \
                       f"Описание: {category.description}"
 
-            # Отправляем сообщение в Telegram
+            # Отправка сообщение на телеграм
             send_message(message)
 
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+# Создание репорта
 class CreateReportView(CreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Создаём жалобу
+        # Создание репорта
         report = serializer.save()
 
-        # Формируем сообщение для Telegram
+        # Телеграм сообщение
         message = (
             f"❗ Новая жалоба:\n\n"
             f"ID жалобы: {report.id}\n"
@@ -50,5 +51,5 @@ class CreateReportView(CreateAPIView):
             f"Создано: {report.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
-        # Отправляем сообщение в Telegram
-        send_message(message)
+        # Отправка сообщение на телеграм
+        send_message(message, report.category.name)

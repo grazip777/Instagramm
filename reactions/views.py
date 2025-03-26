@@ -38,3 +38,50 @@ class DislikeAPIView(APIView):
         Like.objects.filter(user=user, post=post).delete()
         Dislike.objects.create(user=user, post=post)
         return Response({'message': 'Dislike added'}, status=status.HTTP_201_CREATED)
+
+# reactions/views.py
+from rest_framework.generics import ListAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.permissions import IsAuthenticated
+from .models import Comment, Reaction
+from .serializers import CommentSerializer, ReactionSerializer
+from post.models import Post
+
+
+class CommentCreateAPIView(CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)  # Сохраняем автора как текущего пользователя
+
+
+class CommentListAPIView(ListAPIView):
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        # Получаем пост по id и возвращаем только связанные с ним комментарии
+        post_id = self.kwargs.get('post_id')
+        return Comment.objects.filter(post_id=post_id)
+
+
+class CommentDeleteAPIView(DestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+# reactions/views.py
+
+class ReactionCreateAPIView(CreateAPIView):
+    queryset = Reaction.objects.all()
+    serializer_class = ReactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)  # Сохраняем пользователя
+
+
+class ReactionDeleteAPIView(DestroyAPIView):
+    queryset = Reaction.objects.all()
+    serializer_class = ReactionSerializer
+    permission_classes = [IsAuthenticated]

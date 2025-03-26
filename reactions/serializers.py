@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import Like, Dislike, Post
 
 
@@ -42,3 +43,30 @@ class DislikeSerializer(serializers.ModelSerializer):
 
         # Создаём новый дизлайк
         return super().create(validated_data)
+
+# reactions/serializers.py
+from rest_framework import serializers
+from .models import Comment, Reaction
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        extra_kwargs = {
+            'author': {'required': False},
+        }
+
+    def validate(self, data):
+        if not data.get('text'):
+            raise serializers.ValidationError('Комментарий не может быть пустым.')
+        return data
+
+
+class ReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reaction
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'required': False},
+        }

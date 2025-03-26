@@ -29,14 +29,31 @@ class Like(models.Model):
         return f"Like by {self.user.username} on post {self.post.id}"
 
 
-class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-timestamp']
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')  # Связь с постом
+    author = models.ForeignKey(User, on_delete=models.CASCADE)  # Автор комментария
+    text = models.TextField()  # Текст комментария
+    created_at = models.DateTimeField(auto_now_add=True)  # Дата создания
 
     def __str__(self):
-        return f"Comment by {self.user.username} on post {self.post.id}: {self.content[:20]}"
+        return f"Комментарий от {self.author.username} для поста {self.post.title}"
+
+
+class Reaction(models.Model):
+    REACTION_CHOICES = (
+        ('like', 'Лайк'),
+        ('dislike', 'Дизлайк'),
+    )
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reactions')  # Связь с постом
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Автор реакции
+    reaction_type = models.CharField(max_length=10, choices=REACTION_CHOICES)  # Тип реакции (лайк/дизлайк)
+
+    def __str__(self):
+        return f"{self.reaction_type.capitalize()} от {self.user.username} для поста {self.post.title}"
+
+    class Meta:
+        unique_together = ('post', 'user')  # Каждый пользователь может оставить только одну реакцию на пост

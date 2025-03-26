@@ -11,7 +11,6 @@ urlpatterns = [
     path('delete/<int:id>/', delete_user_by_id, name="delete-user"),
     path('users/search/', SearchUserAPIView.as_view(), name='user-search'),
     path('get/emails/', get_emails, name='get-emails')
-
 ]
 
 urlpatterns2 = [
