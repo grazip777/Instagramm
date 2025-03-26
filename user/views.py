@@ -1,11 +1,17 @@
-from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
+from user.models import Subscription
+from user.serializers import RegisterSerializer, UserProfileSerializer, SubscriptionSerializer, \
+    VerifyPhoneAuthCodeSerializer
+from django.core.mail import send_mail
+from user.models import User
+from .serializers import SendAuthCodeSerializer, VerifyAuthCodeSerializer
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from user.models import User, Subscription
-from user.serializers import RegisterSerializer, UserProfileSerializer, SubscriptionSerializer
-
+from rest_framework import status
+from .models import PhoneAuth
+from .serializers import PhoneAuthRequestSerializer
+from twilio.rest import Client
 
 # Регистрация пользователей
 @api_view(["POST"])
@@ -145,13 +151,6 @@ def get_emails(request):
         emails.append(user.email)
     return Response({"emails": emails}, status=200)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.core.mail import send_mail
-from user.models import User
-from .serializers import SendAuthCodeSerializer, VerifyAuthCodeSerializer
-
 
 class SendCodeAPIView(APIView):
     """Отправка кода аутентификации на email пользователя."""
@@ -188,3 +187,62 @@ class VerifyCodeAPIView(APIView):
             email = serializer.validated_data["email"]
             return Response({"message": "Успешный вход в систему!"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendPhoneAuthCodeAPIView(APIView):
+    def post(self, request):
+        serializer = PhoneAuthRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = serializer.validated_data['phone_number']
+
+            # Создаём или обновляем запись в PhoneAuth
+            phone_auth, created = PhoneAuth.objects.get_or_create(phone_number=phone_number)
+            phone_auth.set_auth_code()
+
+            # Отправка через Twilio (или другой SMS-сервис)
+            try:
+                account_sid = 'your_account_sid'  # Укажите свой Twilio SID
+                auth_token = 'your_auth_token'  # Укажите свой Twilio токен
+                client = Client(account_sid, auth_token)
+
+                message = client.messages.create(
+                    body=f"Your authentication code is: {phone_auth.auth_code}",
+                    from_='+1234567890',  # Ваш Twilio номер
+                    to=f'+{phone_number}'
+                )
+            except Exception as e:
+                return Response({'error': f'Ошибка при отправке SMS: {str(e)}'},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({'message': 'Код отправлен на номер телефона.'}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyPhoneAuthCodeAPIView(APIView):
+    def post(self, request):
+        serializer = VerifyPhoneAuthCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = serializer.validated_data['phone_number']
+            code = serializer.validated_data['code']
+
+            # Код успешно подтверждён
+            return Response({'message': 'Код верифицирован успешно.'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+from django.http import HttpResponse
+from .tasks import send_user_confirmation_email
+
+
+def register_user(request):
+    # Код для регистрации пользователя
+    email = "user@example.com"  # Пример email пользователя
+    subject = "Добро пожаловать!"
+    message = "Спасибо за регистрацию! Пожалуйста, подтвердите свой email."
+
+    # Отправляем задачу в Celery
+    send_user_confirmation_email.delay(subject, message, email)
+
+    return HttpResponse("Пользователь зарегистрирован! Проверьте почту для подтверждения.")

@@ -175,3 +175,11 @@ Starting development server at http://127.0.0.1:8000/
     `python manage.py makemigrations`
 4. ** Активировать миграции
    `python manage.py migrate`
+5. ** Запуск докера
+    `docker-compose up --build`
+6. ** Запуск redis для теста(обязательно)
+    `redis-server`
+7. ** Запустить Celery воркер для выполнения(обязательно)
+    `celery -A project worker --loglevel=info`
+8. ** Запуск Calery воркер для запуска(обязательно)
+    `celery -A project beat --loglevel=info`

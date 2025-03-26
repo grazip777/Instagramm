@@ -11,7 +11,9 @@ class Post(models.Model):
     title = models.CharField(max_length=50)
     content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    comments_count = models.PositiveIntegerField(default=0)
+    likes_count = models.PositiveIntegerField(default=0)
+    dislikes_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.title} (Автор: {self.author.username})"

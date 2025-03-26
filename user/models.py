@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.timezone import now
 from django.db.models import UniqueConstraint
+from django.db import models
+from datetime import datetime, timedelta
 
 # User Manager
 class UserManager(BaseUserManager):
@@ -100,3 +102,21 @@ class Subscription(models.Model): # subscription
         ]
         ordering = ['-subscribed_at']
 
+
+class PhoneAuth(models.Model):
+    phone_number = models.CharField(max_length=15, unique=True)  # Уникальный номер телефона
+    auth_code = models.CharField(max_length=6)  # Код аутентификации
+    created_at = models.DateTimeField(auto_now_add=True)  # Дата создания записи
+    expires_at = models.DateTimeField()  # Срок действия кода
+
+    def set_auth_code(self):
+        import random
+
+        self.auth_code = f"{random.randint(100000, 999999)}"  # Сгенерировать 6-значный код
+        self.expires_at = datetime.now() + timedelta(minutes=10)  # Коды действуют 10 минут
+        self.save()
+
+    def is_code_valid(self, code):
+        if self.auth_code == code and datetime.now() <= self.expires_at:
+            return True
+        return False

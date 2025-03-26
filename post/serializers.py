@@ -3,13 +3,17 @@ from rest_framework import serializers
 from .models import Post
 
 # Пост
+
 class PostSerializer(serializers.ModelSerializer):
+    likes_count = serializers.IntegerField(read_only=True)
+    dislikes_count = serializers.IntegerField(read_only=True)
+    comments_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Post
-        fields = '__all__'
-        extra_kwargs = {
-            'author': {'required': False}
-        }
+        fields = ['id', 'title', 'content', 'author', 'likes_count', 'dislikes_count', 'comments_count', 'created_at',
+                  'updated_at']
+
 
     def validate(self, data):
         photo = data.get('photo')

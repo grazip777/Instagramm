@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'post',
     'reactions',
     'report',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -137,4 +138,11 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your_email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your_email_password'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Брокер задач (Redis)
+CELERY_ACCEPT_CONTENT = ['json']  # Какие данные принимать
+CELERY_TASK_SERIALIZER = 'json'  # Формат сериализации задач
+
+# Настройка backend для хранения результатов (можно оставить Redis):
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 

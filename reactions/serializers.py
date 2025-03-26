@@ -42,3 +42,16 @@ class DislikeSerializer(serializers.ModelSerializer):
 
         # Создаём новый дизлайк
         return super().create(validated_data)
+
+from rest_framework import serializers
+from .models import Comment
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')  # Имя пользователя
+    post = serializers.ReadOnlyField(source='post.id')  # ID поста
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'post', 'content', 'timestamp']
+        read_only_fields = ['id', 'user', 'post', 'timestamp']

@@ -6,3 +6,10 @@ requests
 telebot
 psutil
 email-validator
+twilio
+celery
+gunicorn
+redis
+
+django-celery-beat
+

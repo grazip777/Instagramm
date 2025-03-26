@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Subscription
 from user.models import User
+from rest_framework import serializers
+from .models import PhoneAuth
 
 # register serializers
 class RegisterSerializer(serializers.ModelSerializer):
@@ -66,4 +68,35 @@ class VerifyAuthCodeSerializer(serializers.Serializer):
 
         if not user.verify_auth_code(code):
             raise serializers.ValidationError("Неверный или истёкший код аутентификации.")
+        return attrs
+
+
+class PhoneAuthRequestSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+
+    def validate_phone_number(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Номер телефона должен содержать только цифры.")
+        if len(value) < 10 or len(value) > 15:
+            raise serializers.ValidationError("Номер телефона недействителен.")
+        return value
+
+
+class VerifyPhoneAuthCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=15)
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        phone_number = attrs.get("phone_number")
+        code = attrs.get("code")
+
+        try:
+            phone_auth = PhoneAuth.objects.get(phone_number=phone_number)
+        except PhoneAuth.DoesNotExist:
+            raise serializers.ValidationError("Код для этого номера телефона не отправлялся.")
+
+        # Проверяем, что код действителен
+        if not phone_auth.is_code_valid(code):
+            raise serializers.ValidationError("Неверный или истёкший код аутентификации.")
+
         return attrs

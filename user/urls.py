@@ -3,6 +3,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from user.views import register, get_users, update_user_by_id, delete_user_by_id, SearchUserAPIView, get_emails, \
     get_user_by_id, SendCodeAPIView, VerifyCodeAPIView
 from user.views import FollowUserView, UnfollowUserView, ListFollowersView, ListFollowingView
+from django.urls import path
+from .views import SendPhoneAuthCodeAPIView, VerifyPhoneAuthCodeAPIView
 
 # Ссылки пользователей
 urlpatterns = [
@@ -14,8 +16,8 @@ urlpatterns = [
     path('delete/<int:id>/', delete_user_by_id, name="delete-user"), # Удалить данные пользователя
     path('users/search/', SearchUserAPIView.as_view(), name='user-search'), # Получение по username
     path('get/emails/', get_emails, name='get-emails'), # Получение email всех пользователей
-    path('send-code/', SendCodeAPIView.as_view(), name='send_code'),
-    path('verify-code/', VerifyCodeAPIView.as_view(), name='verify_code'),
+    path('send/code/', SendCodeAPIView.as_view(), name='send_code'), # отправление кода на почту
+    path('verify/code/', VerifyCodeAPIView.as_view(), name='verify_code'), # верификация кода
 
 ]
 
@@ -27,4 +29,12 @@ urlpatterns2 = [
     path('following/', ListFollowingView.as_view(), name='list-following'), # Подписки
 ]
 
-urlpatterns = urlpatterns + urlpatterns2 # Метод
+
+urlpatterns3 = [
+    path('send/code/', SendCodeAPIView.as_view(), name='send_code'), # отправление кода на почту
+    path('verify/code/', VerifyCodeAPIView.as_view(), name='verify_code'), # верификация кода
+    path('auth/send-phone-code/', SendPhoneAuthCodeAPIView.as_view(), name='send_phone_code'), # отправка кода на номер
+    path('auth/verify-phone-code/', VerifyPhoneAuthCodeAPIView.as_view(), name='verify_phone_code'), # верификация кода
+]
+
+urlpatterns = urlpatterns + urlpatterns2 + urlpatterns3 # Метод
