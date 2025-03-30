@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ваши сообщения</title>
+</head>
+<body>
+    <h1>Отправленные сообщения</h1>
+    <ul>
+        {% for message in sent_messages %}
+        <li>Кому: {{ message.to }} <br> Сообщение: {{ message.message }} <br> {{ message.created_at }}</li>
+        {% empty %}
+        <li>Нет отправленных сообщений</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Полученные сообщения</h1>
+    <ul>
+        {% for message in received_messages %}
+        <li>От: {{ message.sender }} <br> Сообщение: {{ message.message }} <br> {{ message.created_at }}</li>
+        {% empty %}
+        <li>Нет полученных сообщений</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

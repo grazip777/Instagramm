@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     'post',
     'reactions',
     'report',
+    'message',
+    'drf_yasg',
+
 ]
 
 MIDDLEWARE = [
